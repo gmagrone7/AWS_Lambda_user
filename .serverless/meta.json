@@ -1,0 +1,4075 @@
+{
+  "C:\\PROJECT\\HireTest": {
+    "versionSfCore": null,
+    "versionFramework": "4.1.21",
+    "isWithinCompose": false,
+    "isCompose": false,
+    "composeOrgName": null,
+    "composeResolverProviders": {
+      "aws": {
+        "instance": {
+          "credentials": "<REDACTED>",
+          "serviceConfigFile": {
+            "service": "serverless-flask",
+            "plugins": [
+              "serverless-python-requirements",
+              "serverless-wsgi",
+              "serverless-api-gateway-throttling"
+            ],
+            "custom": {
+              "tableName": "users-table-dev",
+              "wsgi": {
+                "app": "app.app",
+                "packRequirements": false
+              },
+              "pythonRequirements": {
+                "dockerizePip": "non-linux",
+                "slim": true
+              },
+              "apiGatewayThrottling": {
+                "maxRequestsPerSecond": 500,
+                "maxConcurrentRequests": 250
+              }
+            },
+            "provider": {
+              "name": "aws",
+              "runtime": "python3.12",
+              "stage": "dev",
+              "region": "us-east-1",
+              "iamRoleStatements": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "UsersDynamoDBTable",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "environment": {
+                "USERS_TABLE": "users-table-dev"
+              },
+              "versionFunctions": true,
+              "compiledCloudFormationTemplate": {
+                "AWSTemplateFormatVersion": "2010-09-09",
+                "Description": "The AWS CloudFormation template for this Serverless application",
+                "Resources": {
+                  "ServerlessDeploymentBucket": {
+                    "Type": "AWS::S3::Bucket",
+                    "Properties": {
+                      "BucketEncryption": {
+                        "ServerSideEncryptionConfiguration": [
+                          {
+                            "ServerSideEncryptionByDefault": {
+                              "SSEAlgorithm": "AES256"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "ServerlessDeploymentBucketPolicy": {
+                    "Type": "AWS::S3::BucketPolicy",
+                    "Properties": {
+                      "Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "PolicyDocument": {
+                        "Statement": [
+                          {
+                            "Action": "s3:*",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    },
+                                    "/*"
+                                  ]
+                                ]
+                              },
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "Condition": {
+                              "Bool": {
+                                "aws:SecureTransport": false
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "AppLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-app"
+                    }
+                  },
+                  "GetUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-getUser"
+                    }
+                  },
+                  "CreateUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-createUser"
+                    }
+                  },
+                  "DeleteUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-deleteUser"
+                    }
+                  },
+                  "UpdateUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-updateUser"
+                    }
+                  },
+                  "IamRoleLambdaExecution": {
+                    "Type": "AWS::IAM::Role",
+                    "Properties": {
+                      "AssumeRolePolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                          {
+                            "Effect": "Allow",
+                            "Principal": {
+                              "Service": [
+                                "lambda.amazonaws.com"
+                              ]
+                            },
+                            "Action": [
+                              "sts:AssumeRole"
+                            ]
+                          }
+                        ]
+                      },
+                      "Policies": [
+                        {
+                          "PolicyName": {
+                            "Fn::Join": [
+                              "-",
+                              [
+                                "serverless-flask",
+                                "dev",
+                                "lambda"
+                              ]
+                            ]
+                          },
+                          "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:CreateLogStream",
+                                  "logs:CreateLogGroup",
+                                  "logs:TagResource"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*"
+                                  }
+                                ]
+                              },
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:PutLogEvents"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*:*"
+                                  }
+                                ]
+                              },
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "dynamodb:Query",
+                                  "dynamodb:Scan",
+                                  "dynamodb:GetItem",
+                                  "dynamodb:PutItem",
+                                  "dynamodb:UpdateItem",
+                                  "dynamodb:DeleteItem"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::GetAtt": [
+                                      "UsersDynamoDBTable",
+                                      "Arn"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "Path": "/",
+                      "RoleName": {
+                        "Fn::Join": [
+                          "-",
+                          [
+                            "serverless-flask",
+                            "dev",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            "lambdaRole"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "AppLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-app",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "AppLogGroup"
+                    ]
+                  },
+                  "GetUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-getUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "GetUserLogGroup"
+                    ]
+                  },
+                  "CreateUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-createUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "CreateUserLogGroup"
+                    ]
+                  },
+                  "DeleteUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-deleteUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "DeleteUserLogGroup"
+                    ]
+                  },
+                  "UpdateUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-updateUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "UpdateUserLogGroup"
+                    ]
+                  },
+                  "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "AppLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "GetUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "CreateUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "DeleteUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "UpdateUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "ApiGatewayRestApi": {
+                    "Type": "AWS::ApiGateway::RestApi",
+                    "Properties": {
+                      "Name": "dev-serverless-flask",
+                      "EndpointConfiguration": {
+                        "Types": [
+                          "EDGE"
+                        ]
+                      },
+                      "Policy": ""
+                    }
+                  },
+                  "ApiGatewayResourceProxyVar": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Fn::GetAtt": [
+                          "ApiGatewayRestApi",
+                          "RootResourceId"
+                        ]
+                      },
+                      "PathPart": "{proxy+}",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsers": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Fn::GetAtt": [
+                          "ApiGatewayRestApi",
+                          "RootResourceId"
+                        ]
+                      },
+                      "PathPart": "users",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsersProxyVar": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "PathPart": "{proxy+}",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsersDelete": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "PathPart": "delete",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsersUpdate": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "PathPart": "update",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayMethodAny": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "ANY",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Fn::GetAtt": [
+                          "ApiGatewayRestApi",
+                          "RootResourceId"
+                        ]
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "AppLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "AppLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodProxyVarAny": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "ANY",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceProxyVar"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "AppLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "AppLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersProxyVarGet": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "GET",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsersProxyVar"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "GetUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "GetUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersPost": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "POST",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "CreateUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "CreateUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersDeletePost": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "POST",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsersDelete"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "DeleteUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "DeleteUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersUpdatePost": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "POST",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsersUpdate"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "UpdateUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "UpdateUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayDeployment1723545330182": {
+                    "Type": "AWS::ApiGateway::Deployment",
+                    "Properties": {
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "StageName": "dev"
+                    },
+                    "DependsOn": [
+                      "ApiGatewayMethodAny",
+                      "ApiGatewayMethodProxyVarAny",
+                      "ApiGatewayMethodUsersProxyVarGet",
+                      "ApiGatewayMethodUsersPost",
+                      "ApiGatewayMethodUsersDeletePost",
+                      "ApiGatewayMethodUsersUpdatePost"
+                    ]
+                  },
+                  "AppLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "GetUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "GetUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "CreateUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "CreateUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "DeleteUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "DeleteUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "UpdateUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "UpdateUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "UsersDynamoDBTable": {
+                    "Type": "AWS::DynamoDB::Table",
+                    "Properties": {
+                      "AttributeDefinitions": [
+                        {
+                          "AttributeName": "userId",
+                          "AttributeType": "S"
+                        }
+                      ],
+                      "KeySchema": [
+                        {
+                          "AttributeName": "userId",
+                          "KeyType": "HASH"
+                        }
+                      ],
+                      "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 1,
+                        "WriteCapacityUnits": 1
+                      },
+                      "TableName": "users-table-dev"
+                    }
+                  }
+                },
+                "Outputs": {
+                  "ServerlessDeploymentBucketName": {
+                    "Value": {
+                      "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-ServerlessDeploymentBucketName"
+                    }
+                  },
+                  "AppLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-AppLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "GetUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-GetUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "CreateUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-CreateUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "DeleteUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-DeleteUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "UpdateUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-UpdateUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "ServiceEndpoint": {
+                    "Description": "URL of the service endpoint",
+                    "Value": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "https://",
+                          {
+                            "Ref": "ApiGatewayRestApi"
+                          },
+                          ".execute-api.",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ".",
+                          {
+                            "Ref": "AWS::URLSuffix"
+                          },
+                          "/dev"
+                        ]
+                      ]
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-ServiceEndpoint"
+                    }
+                  },
+                  "RestApiIdForApigThrottling": {
+                    "Description": "REST API ID",
+                    "Value": {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-RestApiIdForApigThrottling"
+                    }
+                  }
+                }
+              },
+              "coreCloudFormationTemplate": {
+                "AWSTemplateFormatVersion": "2010-09-09",
+                "Description": "The AWS CloudFormation template for this Serverless application",
+                "Resources": {
+                  "ServerlessDeploymentBucket": {
+                    "Type": "AWS::S3::Bucket",
+                    "Properties": {
+                      "BucketEncryption": {
+                        "ServerSideEncryptionConfiguration": [
+                          {
+                            "ServerSideEncryptionByDefault": {
+                              "SSEAlgorithm": "AES256"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "ServerlessDeploymentBucketPolicy": {
+                    "Type": "AWS::S3::BucketPolicy",
+                    "Properties": {
+                      "Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "PolicyDocument": {
+                        "Statement": [
+                          {
+                            "Action": "s3:*",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    },
+                                    "/*"
+                                  ]
+                                ]
+                              },
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "Condition": {
+                              "Bool": {
+                                "aws:SecureTransport": false
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "Outputs": {
+                  "ServerlessDeploymentBucketName": {
+                    "Value": {
+                      "Ref": "ServerlessDeploymentBucket"
+                    }
+                  }
+                }
+              },
+              "vpc": {}
+            },
+            "functions": {
+              "app": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "ANY /"
+                  },
+                  {
+                    "http": "ANY {proxy+}"
+                  }
+                ],
+                "name": "serverless-flask-dev-app",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ"
+              },
+              "getUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "GET /users/{proxy+}"
+                  }
+                ],
+                "name": "serverless-flask-dev-getUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA"
+              },
+              "createUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "POST /users/"
+                  }
+                ],
+                "name": "serverless-flask-dev-createUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08"
+              },
+              "deleteUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "POST /users/delete"
+                  }
+                ],
+                "name": "serverless-flask-dev-deleteUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io"
+              },
+              "updateUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "POST /users/update"
+                  }
+                ],
+                "name": "serverless-flask-dev-updateUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw"
+              }
+            },
+            "resources": {
+              "Resources": {
+                "UsersDynamoDBTable": {
+                  "Type": "AWS::DynamoDB::Table",
+                  "Properties": {
+                    "AttributeDefinitions": [
+                      {
+                        "AttributeName": "userId",
+                        "AttributeType": "S"
+                      }
+                    ],
+                    "KeySchema": [
+                      {
+                        "AttributeName": "userId",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "ProvisionedThroughput": {
+                      "ReadCapacityUnits": 1,
+                      "WriteCapacityUnits": 1
+                    },
+                    "TableName": "users-table-dev"
+                  }
+                }
+              },
+              "Outputs": {}
+            }
+          },
+          "configFileDirPath": "C:\\PROJECT\\HireTest",
+          "config": {
+            "type": "aws"
+          },
+          "options": {},
+          "stage": "dev",
+          "dashboard": null,
+          "isDefaultConfig": true
+        },
+        "resolvers": {}
+      },
+      "self": {
+        "instance": {
+          "credentials": "<REDACTED>",
+          "serviceConfigFile": {
+            "service": "serverless-flask",
+            "plugins": [
+              "serverless-python-requirements",
+              "serverless-wsgi",
+              "serverless-api-gateway-throttling"
+            ],
+            "custom": {
+              "tableName": "users-table-dev",
+              "wsgi": {
+                "app": "app.app",
+                "packRequirements": false
+              },
+              "pythonRequirements": {
+                "dockerizePip": "non-linux",
+                "slim": true
+              },
+              "apiGatewayThrottling": {
+                "maxRequestsPerSecond": 500,
+                "maxConcurrentRequests": 250
+              }
+            },
+            "provider": {
+              "name": "aws",
+              "runtime": "python3.12",
+              "stage": "dev",
+              "region": "us-east-1",
+              "iamRoleStatements": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "UsersDynamoDBTable",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "environment": {
+                "USERS_TABLE": "users-table-dev"
+              },
+              "versionFunctions": true,
+              "compiledCloudFormationTemplate": {
+                "AWSTemplateFormatVersion": "2010-09-09",
+                "Description": "The AWS CloudFormation template for this Serverless application",
+                "Resources": {
+                  "ServerlessDeploymentBucket": {
+                    "Type": "AWS::S3::Bucket",
+                    "Properties": {
+                      "BucketEncryption": {
+                        "ServerSideEncryptionConfiguration": [
+                          {
+                            "ServerSideEncryptionByDefault": {
+                              "SSEAlgorithm": "AES256"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "ServerlessDeploymentBucketPolicy": {
+                    "Type": "AWS::S3::BucketPolicy",
+                    "Properties": {
+                      "Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "PolicyDocument": {
+                        "Statement": [
+                          {
+                            "Action": "s3:*",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    },
+                                    "/*"
+                                  ]
+                                ]
+                              },
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "Condition": {
+                              "Bool": {
+                                "aws:SecureTransport": false
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "AppLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-app"
+                    }
+                  },
+                  "GetUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-getUser"
+                    }
+                  },
+                  "CreateUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-createUser"
+                    }
+                  },
+                  "DeleteUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-deleteUser"
+                    }
+                  },
+                  "UpdateUserLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/serverless-flask-dev-updateUser"
+                    }
+                  },
+                  "IamRoleLambdaExecution": {
+                    "Type": "AWS::IAM::Role",
+                    "Properties": {
+                      "AssumeRolePolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                          {
+                            "Effect": "Allow",
+                            "Principal": {
+                              "Service": [
+                                "lambda.amazonaws.com"
+                              ]
+                            },
+                            "Action": [
+                              "sts:AssumeRole"
+                            ]
+                          }
+                        ]
+                      },
+                      "Policies": [
+                        {
+                          "PolicyName": {
+                            "Fn::Join": [
+                              "-",
+                              [
+                                "serverless-flask",
+                                "dev",
+                                "lambda"
+                              ]
+                            ]
+                          },
+                          "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:CreateLogStream",
+                                  "logs:CreateLogGroup",
+                                  "logs:TagResource"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*"
+                                  }
+                                ]
+                              },
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:PutLogEvents"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*:*"
+                                  }
+                                ]
+                              },
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "dynamodb:Query",
+                                  "dynamodb:Scan",
+                                  "dynamodb:GetItem",
+                                  "dynamodb:PutItem",
+                                  "dynamodb:UpdateItem",
+                                  "dynamodb:DeleteItem"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::GetAtt": [
+                                      "UsersDynamoDBTable",
+                                      "Arn"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "Path": "/",
+                      "RoleName": {
+                        "Fn::Join": [
+                          "-",
+                          [
+                            "serverless-flask",
+                            "dev",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            "lambdaRole"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "AppLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-app",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "AppLogGroup"
+                    ]
+                  },
+                  "GetUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-getUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "GetUserLogGroup"
+                    ]
+                  },
+                  "CreateUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-createUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "CreateUserLogGroup"
+                    ]
+                  },
+                  "DeleteUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-deleteUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "DeleteUserLogGroup"
+                    ]
+                  },
+                  "UpdateUserLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": {
+                          "Ref": "ServerlessDeploymentBucket"
+                        },
+                        "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                      },
+                      "Handler": "wsgi_handler.handler",
+                      "Runtime": "python3.12",
+                      "FunctionName": "serverless-flask-dev-updateUser",
+                      "MemorySize": 1024,
+                      "Timeout": 6,
+                      "Environment": {
+                        "Variables": {
+                          "USERS_TABLE": "users-table-dev"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "UpdateUserLogGroup"
+                    ]
+                  },
+                  "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "AppLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "GetUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "CreateUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "DeleteUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "UpdateUserLambdaFunction"
+                      },
+                      "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+                    }
+                  },
+                  "ApiGatewayRestApi": {
+                    "Type": "AWS::ApiGateway::RestApi",
+                    "Properties": {
+                      "Name": "dev-serverless-flask",
+                      "EndpointConfiguration": {
+                        "Types": [
+                          "EDGE"
+                        ]
+                      },
+                      "Policy": ""
+                    }
+                  },
+                  "ApiGatewayResourceProxyVar": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Fn::GetAtt": [
+                          "ApiGatewayRestApi",
+                          "RootResourceId"
+                        ]
+                      },
+                      "PathPart": "{proxy+}",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsers": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Fn::GetAtt": [
+                          "ApiGatewayRestApi",
+                          "RootResourceId"
+                        ]
+                      },
+                      "PathPart": "users",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsersProxyVar": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "PathPart": "{proxy+}",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsersDelete": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "PathPart": "delete",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayResourceUsersUpdate": {
+                    "Type": "AWS::ApiGateway::Resource",
+                    "Properties": {
+                      "ParentId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "PathPart": "update",
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      }
+                    }
+                  },
+                  "ApiGatewayMethodAny": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "ANY",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Fn::GetAtt": [
+                          "ApiGatewayRestApi",
+                          "RootResourceId"
+                        ]
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "AppLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "AppLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodProxyVarAny": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "ANY",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceProxyVar"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "AppLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "AppLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersProxyVarGet": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "GET",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsersProxyVar"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "GetUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "GetUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersPost": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "POST",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsers"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "CreateUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "CreateUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersDeletePost": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "POST",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsersDelete"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "DeleteUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "DeleteUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayMethodUsersUpdatePost": {
+                    "Type": "AWS::ApiGateway::Method",
+                    "Properties": {
+                      "HttpMethod": "POST",
+                      "RequestParameters": {},
+                      "ResourceId": {
+                        "Ref": "ApiGatewayResourceUsersUpdate"
+                      },
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "ApiKeyRequired": "<REDACTED>",
+                      "AuthorizationType": "NONE",
+                      "Integration": {
+                        "IntegrationHttpMethod": "POST",
+                        "Type": "AWS_PROXY",
+                        "Uri": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":apigateway:",
+                              {
+                                "Ref": "AWS::Region"
+                              },
+                              ":lambda:path/2015-03-31/functions/",
+                              {
+                                "Fn::GetAtt": [
+                                  "UpdateUserLambdaFunction",
+                                  "Arn"
+                                ]
+                              },
+                              "/invocations"
+                            ]
+                          ]
+                        }
+                      },
+                      "MethodResponses": []
+                    },
+                    "DependsOn": [
+                      "UpdateUserLambdaPermissionApiGateway"
+                    ]
+                  },
+                  "ApiGatewayDeployment1723545330182": {
+                    "Type": "AWS::ApiGateway::Deployment",
+                    "Properties": {
+                      "RestApiId": {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "StageName": "dev"
+                    },
+                    "DependsOn": [
+                      "ApiGatewayMethodAny",
+                      "ApiGatewayMethodProxyVarAny",
+                      "ApiGatewayMethodUsersProxyVarGet",
+                      "ApiGatewayMethodUsersPost",
+                      "ApiGatewayMethodUsersDeletePost",
+                      "ApiGatewayMethodUsersUpdatePost"
+                    ]
+                  },
+                  "AppLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "GetUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "GetUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "CreateUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "CreateUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "DeleteUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "DeleteUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "UpdateUserLambdaPermissionApiGateway": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "UpdateUserLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "UsersDynamoDBTable": {
+                    "Type": "AWS::DynamoDB::Table",
+                    "Properties": {
+                      "AttributeDefinitions": [
+                        {
+                          "AttributeName": "userId",
+                          "AttributeType": "S"
+                        }
+                      ],
+                      "KeySchema": [
+                        {
+                          "AttributeName": "userId",
+                          "KeyType": "HASH"
+                        }
+                      ],
+                      "ProvisionedThroughput": {
+                        "ReadCapacityUnits": 1,
+                        "WriteCapacityUnits": 1
+                      },
+                      "TableName": "users-table-dev"
+                    }
+                  }
+                },
+                "Outputs": {
+                  "ServerlessDeploymentBucketName": {
+                    "Value": {
+                      "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-ServerlessDeploymentBucketName"
+                    }
+                  },
+                  "AppLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-AppLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "GetUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-GetUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "CreateUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-CreateUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "DeleteUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-DeleteUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "UpdateUserLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-UpdateUserLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "ServiceEndpoint": {
+                    "Description": "URL of the service endpoint",
+                    "Value": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "https://",
+                          {
+                            "Ref": "ApiGatewayRestApi"
+                          },
+                          ".execute-api.",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ".",
+                          {
+                            "Ref": "AWS::URLSuffix"
+                          },
+                          "/dev"
+                        ]
+                      ]
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-ServiceEndpoint"
+                    }
+                  },
+                  "RestApiIdForApigThrottling": {
+                    "Description": "REST API ID",
+                    "Value": {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "Export": {
+                      "Name": "sls-serverless-flask-dev-RestApiIdForApigThrottling"
+                    }
+                  }
+                }
+              },
+              "coreCloudFormationTemplate": {
+                "AWSTemplateFormatVersion": "2010-09-09",
+                "Description": "The AWS CloudFormation template for this Serverless application",
+                "Resources": {
+                  "ServerlessDeploymentBucket": {
+                    "Type": "AWS::S3::Bucket",
+                    "Properties": {
+                      "BucketEncryption": {
+                        "ServerSideEncryptionConfiguration": [
+                          {
+                            "ServerSideEncryptionByDefault": {
+                              "SSEAlgorithm": "AES256"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "ServerlessDeploymentBucketPolicy": {
+                    "Type": "AWS::S3::BucketPolicy",
+                    "Properties": {
+                      "Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "PolicyDocument": {
+                        "Statement": [
+                          {
+                            "Action": "s3:*",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    },
+                                    "/*"
+                                  ]
+                                ]
+                              },
+                              {
+                                "Fn::Join": [
+                                  "",
+                                  [
+                                    "arn:",
+                                    {
+                                      "Ref": "AWS::Partition"
+                                    },
+                                    ":s3:::",
+                                    {
+                                      "Ref": "ServerlessDeploymentBucket"
+                                    }
+                                  ]
+                                ]
+                              }
+                            ],
+                            "Condition": {
+                              "Bool": {
+                                "aws:SecureTransport": false
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "Outputs": {
+                  "ServerlessDeploymentBucketName": {
+                    "Value": {
+                      "Ref": "ServerlessDeploymentBucket"
+                    }
+                  }
+                }
+              },
+              "vpc": {}
+            },
+            "functions": {
+              "app": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "ANY /"
+                  },
+                  {
+                    "http": "ANY {proxy+}"
+                  }
+                ],
+                "name": "serverless-flask-dev-app",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ"
+              },
+              "getUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "GET /users/{proxy+}"
+                  }
+                ],
+                "name": "serverless-flask-dev-getUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA"
+              },
+              "createUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "POST /users/"
+                  }
+                ],
+                "name": "serverless-flask-dev-createUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08"
+              },
+              "deleteUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "POST /users/delete"
+                  }
+                ],
+                "name": "serverless-flask-dev-deleteUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io"
+              },
+              "updateUser": {
+                "handler": "wsgi_handler.handler",
+                "events": [
+                  {
+                    "http": "POST /users/update"
+                  }
+                ],
+                "name": "serverless-flask-dev-updateUser",
+                "package": {},
+                "memory": 1024,
+                "timeout": 6,
+                "runtime": "python3.12",
+                "vpc": {},
+                "versionLogicalId": "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw"
+              }
+            },
+            "resources": {
+              "Resources": {
+                "UsersDynamoDBTable": {
+                  "Type": "AWS::DynamoDB::Table",
+                  "Properties": {
+                    "AttributeDefinitions": [
+                      {
+                        "AttributeName": "userId",
+                        "AttributeType": "S"
+                      }
+                    ],
+                    "KeySchema": [
+                      {
+                        "AttributeName": "userId",
+                        "KeyType": "HASH"
+                      }
+                    ],
+                    "ProvisionedThroughput": {
+                      "ReadCapacityUnits": 1,
+                      "WriteCapacityUnits": 1
+                    },
+                    "TableName": "users-table-dev"
+                  }
+                }
+              },
+              "Outputs": {}
+            }
+          },
+          "configFileDirPath": "C:\\PROJECT\\HireTest",
+          "config": {
+            "type": "self"
+          },
+          "options": {},
+          "stage": "dev",
+          "dashboard": null
+        },
+        "resolvers": {}
+      }
+    },
+    "composeServiceName": null,
+    "servicePath": "C:\\PROJECT\\HireTest",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "serverless-flask",
+      "plugins": [
+        "serverless-python-requirements",
+        "serverless-wsgi",
+        "serverless-api-gateway-throttling"
+      ],
+      "custom": {
+        "tableName": "users-table-dev",
+        "wsgi": {
+          "app": "app.app",
+          "packRequirements": false
+        },
+        "pythonRequirements": {
+          "dockerizePip": "non-linux",
+          "slim": true
+        },
+        "apiGatewayThrottling": {
+          "maxRequestsPerSecond": 500,
+          "maxConcurrentRequests": 250
+        }
+      },
+      "provider": {
+        "name": "aws",
+        "runtime": "python3.12",
+        "stage": "dev",
+        "region": "us-east-1",
+        "iamRoleStatements": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:Query",
+              "dynamodb:Scan",
+              "dynamodb:GetItem",
+              "dynamodb:PutItem",
+              "dynamodb:UpdateItem",
+              "dynamodb:DeleteItem"
+            ],
+            "Resource": [
+              {
+                "Fn::GetAtt": [
+                  "UsersDynamoDBTable",
+                  "Arn"
+                ]
+              }
+            ]
+          }
+        ],
+        "environment": {
+          "USERS_TABLE": "users-table-dev"
+        },
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "ServerlessDeploymentBucket": {
+              "Type": "AWS::S3::Bucket",
+              "Properties": {
+                "BucketEncryption": {
+                  "ServerSideEncryptionConfiguration": [
+                    {
+                      "ServerSideEncryptionByDefault": {
+                        "SSEAlgorithm": "AES256"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "ServerlessDeploymentBucketPolicy": {
+              "Type": "AWS::S3::BucketPolicy",
+              "Properties": {
+                "Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "PolicyDocument": {
+                  "Statement": [
+                    {
+                      "Action": "s3:*",
+                      "Effect": "Deny",
+                      "Principal": "*",
+                      "Resource": [
+                        {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":s3:::",
+                              {
+                                "Ref": "ServerlessDeploymentBucket"
+                              },
+                              "/*"
+                            ]
+                          ]
+                        },
+                        {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":s3:::",
+                              {
+                                "Ref": "ServerlessDeploymentBucket"
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "Condition": {
+                        "Bool": {
+                          "aws:SecureTransport": false
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "AppLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-flask-dev-app"
+              }
+            },
+            "GetUserLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-flask-dev-getUser"
+              }
+            },
+            "CreateUserLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-flask-dev-createUser"
+              }
+            },
+            "DeleteUserLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-flask-dev-deleteUser"
+              }
+            },
+            "UpdateUserLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-flask-dev-updateUser"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "serverless-flask",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev*:*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "dynamodb:Query",
+                            "dynamodb:Scan",
+                            "dynamodb:GetItem",
+                            "dynamodb:PutItem",
+                            "dynamodb:UpdateItem",
+                            "dynamodb:DeleteItem"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::GetAtt": [
+                                "UsersDynamoDBTable",
+                                "Arn"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "serverless-flask",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "AppLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": {
+                    "Ref": "ServerlessDeploymentBucket"
+                  },
+                  "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                },
+                "Handler": "wsgi_handler.handler",
+                "Runtime": "python3.12",
+                "FunctionName": "serverless-flask-dev-app",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "USERS_TABLE": "users-table-dev"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "AppLogGroup"
+              ]
+            },
+            "GetUserLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": {
+                    "Ref": "ServerlessDeploymentBucket"
+                  },
+                  "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                },
+                "Handler": "wsgi_handler.handler",
+                "Runtime": "python3.12",
+                "FunctionName": "serverless-flask-dev-getUser",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "USERS_TABLE": "users-table-dev"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "GetUserLogGroup"
+              ]
+            },
+            "CreateUserLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": {
+                    "Ref": "ServerlessDeploymentBucket"
+                  },
+                  "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                },
+                "Handler": "wsgi_handler.handler",
+                "Runtime": "python3.12",
+                "FunctionName": "serverless-flask-dev-createUser",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "USERS_TABLE": "users-table-dev"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "CreateUserLogGroup"
+              ]
+            },
+            "DeleteUserLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": {
+                    "Ref": "ServerlessDeploymentBucket"
+                  },
+                  "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                },
+                "Handler": "wsgi_handler.handler",
+                "Runtime": "python3.12",
+                "FunctionName": "serverless-flask-dev-deleteUser",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "USERS_TABLE": "users-table-dev"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "DeleteUserLogGroup"
+              ]
+            },
+            "UpdateUserLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": {
+                    "Ref": "ServerlessDeploymentBucket"
+                  },
+                  "S3Key": "serverless/serverless-flask/dev/1723545404686-2024-08-13T10:36:44.686Z/serverless-flask.zip"
+                },
+                "Handler": "wsgi_handler.handler",
+                "Runtime": "python3.12",
+                "FunctionName": "serverless-flask-dev-updateUser",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "USERS_TABLE": "users-table-dev"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "UpdateUserLogGroup"
+              ]
+            },
+            "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "AppLambdaFunction"
+                },
+                "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+              }
+            },
+            "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "GetUserLambdaFunction"
+                },
+                "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+              }
+            },
+            "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CreateUserLambdaFunction"
+                },
+                "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+              }
+            },
+            "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "DeleteUserLambdaFunction"
+                },
+                "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+              }
+            },
+            "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "UpdateUserLambdaFunction"
+                },
+                "CodeSha256": "fy9B7xjB6d0hQDbghVarzOTdIo/fRJHiu2grxyWQ9FA="
+              }
+            },
+            "ApiGatewayRestApi": {
+              "Type": "AWS::ApiGateway::RestApi",
+              "Properties": {
+                "Name": "dev-serverless-flask",
+                "EndpointConfiguration": {
+                  "Types": [
+                    "EDGE"
+                  ]
+                },
+                "Policy": ""
+              }
+            },
+            "ApiGatewayResourceProxyVar": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "{proxy+}",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceUsers": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "users",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceUsersProxyVar": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Ref": "ApiGatewayResourceUsers"
+                },
+                "PathPart": "{proxy+}",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceUsersDelete": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Ref": "ApiGatewayResourceUsers"
+                },
+                "PathPart": "delete",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceUsersUpdate": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Ref": "ApiGatewayResourceUsers"
+                },
+                "PathPart": "update",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayMethodAny": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "ANY",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodProxyVarAny": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "ANY",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceProxyVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodUsersProxyVarGet": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUsersProxyVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "GetUserLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "GetUserLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodUsersPost": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUsers"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "CreateUserLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "CreateUserLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodUsersDeletePost": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUsersDelete"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "DeleteUserLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "DeleteUserLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodUsersUpdatePost": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceUsersUpdate"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "UpdateUserLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "UpdateUserLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayDeployment1723545330182": {
+              "Type": "AWS::ApiGateway::Deployment",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "StageName": "dev"
+              },
+              "DependsOn": [
+                "ApiGatewayMethodAny",
+                "ApiGatewayMethodProxyVarAny",
+                "ApiGatewayMethodUsersProxyVarGet",
+                "ApiGatewayMethodUsersPost",
+                "ApiGatewayMethodUsersDeletePost",
+                "ApiGatewayMethodUsersUpdatePost"
+              ]
+            },
+            "AppLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "AppLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "GetUserLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "GetUserLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "CreateUserLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "CreateUserLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "DeleteUserLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "DeleteUserLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "UpdateUserLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "UpdateUserLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "UsersDynamoDBTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "userId",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "userId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "ProvisionedThroughput": {
+                  "ReadCapacityUnits": 1,
+                  "WriteCapacityUnits": 1
+                },
+                "TableName": "users-table-dev"
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-ServerlessDeploymentBucketName"
+              }
+            },
+            "AppLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-AppLambdaFunctionQualifiedArn"
+              }
+            },
+            "GetUserLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-GetUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "CreateUserLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-CreateUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "DeleteUserLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-DeleteUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "UpdateUserLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-UpdateUserLambdaFunctionQualifiedArn"
+              }
+            },
+            "ServiceEndpoint": {
+              "Description": "URL of the service endpoint",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    },
+                    "/dev"
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-ServiceEndpoint"
+              }
+            },
+            "RestApiIdForApigThrottling": {
+              "Description": "REST API ID",
+              "Value": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "Export": {
+                "Name": "sls-serverless-flask-dev-RestApiIdForApigThrottling"
+              }
+            }
+          }
+        },
+        "coreCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "ServerlessDeploymentBucket": {
+              "Type": "AWS::S3::Bucket",
+              "Properties": {
+                "BucketEncryption": {
+                  "ServerSideEncryptionConfiguration": [
+                    {
+                      "ServerSideEncryptionByDefault": {
+                        "SSEAlgorithm": "AES256"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "ServerlessDeploymentBucketPolicy": {
+              "Type": "AWS::S3::BucketPolicy",
+              "Properties": {
+                "Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "PolicyDocument": {
+                  "Statement": [
+                    {
+                      "Action": "s3:*",
+                      "Effect": "Deny",
+                      "Principal": "*",
+                      "Resource": [
+                        {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":s3:::",
+                              {
+                                "Ref": "ServerlessDeploymentBucket"
+                              },
+                              "/*"
+                            ]
+                          ]
+                        },
+                        {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:",
+                              {
+                                "Ref": "AWS::Partition"
+                              },
+                              ":s3:::",
+                              {
+                                "Ref": "ServerlessDeploymentBucket"
+                              }
+                            ]
+                          ]
+                        }
+                      ],
+                      "Condition": {
+                        "Bool": {
+                          "aws:SecureTransport": false
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": {
+                "Ref": "ServerlessDeploymentBucket"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "functions": {
+        "app": {
+          "handler": "wsgi_handler.handler",
+          "events": [
+            {
+              "http": "ANY /"
+            },
+            {
+              "http": "ANY {proxy+}"
+            }
+          ],
+          "name": "serverless-flask-dev-app",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "python3.12",
+          "vpc": {},
+          "versionLogicalId": "AppLambdaVersion2Eyo1zSuNoYoECKjGug2aekqQKgJgburq7EIn5eykWQ"
+        },
+        "getUser": {
+          "handler": "wsgi_handler.handler",
+          "events": [
+            {
+              "http": "GET /users/{proxy+}"
+            }
+          ],
+          "name": "serverless-flask-dev-getUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "python3.12",
+          "vpc": {},
+          "versionLogicalId": "GetUserLambdaVersionVLhIyQ9Mmwv8W7HmpF1SHmOrAWuqDNikxaSsdDDo8RA"
+        },
+        "createUser": {
+          "handler": "wsgi_handler.handler",
+          "events": [
+            {
+              "http": "POST /users/"
+            }
+          ],
+          "name": "serverless-flask-dev-createUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "python3.12",
+          "vpc": {},
+          "versionLogicalId": "CreateUserLambdaVersion5fOFEcoL5lM45mkJoLsHkvJwOGRUoCCxMkO5fXy08"
+        },
+        "deleteUser": {
+          "handler": "wsgi_handler.handler",
+          "events": [
+            {
+              "http": "POST /users/delete"
+            }
+          ],
+          "name": "serverless-flask-dev-deleteUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "python3.12",
+          "vpc": {},
+          "versionLogicalId": "DeleteUserLambdaVersionMh38QNNwdv5pw7DkutGvji1UnqFFKrGXom16P5m4Io"
+        },
+        "updateUser": {
+          "handler": "wsgi_handler.handler",
+          "events": [
+            {
+              "http": "POST /users/update"
+            }
+          ],
+          "name": "serverless-flask-dev-updateUser",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "python3.12",
+          "vpc": {},
+          "versionLogicalId": "UpdateUserLambdaVersion3oY9N5XDO79Y4dlghrfDUexDL3bf3enCZ2gJ8xX7pyw"
+        }
+      },
+      "resources": {
+        "Resources": {
+          "UsersDynamoDBTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "users-table-dev"
+            }
+          }
+        },
+        "Outputs": {}
+      }
+    },
+    "serviceRawFile": "# serverless.yml\n#\n# Defininig the name of the Serverless service\nservice: serverless-flask\n# The name of the service. This is what the service will be called in AWS\n#\n# Specification of the plugins that the Serverless framework will use \nplugins:\n  - serverless-python-requirements\n  - serverless-wsgi\n  - serverless-api-gateway-throttling\n\n# These are the plugins that are being used:\n# 1) Serverless python requirements, manage python dependencies\n# 2) Serverless wsgi, allows integration of apps like Flask with Serverless \n# \n# Definition of the custom variables that  can be reused with the\n# configuration file.\ncustom:\n  tableName: 'users-table-${self:provider.stage}' # Custom variable for the DynamoDB table name, which is dynamically set based on the stage.\n  wsgi:\n    app: app.app\n    # Specifies the WSGI application. 'app' is the module and 'app' is the Flask app object\n    packRequirements: false # to use the serverless-python requirements to handle the packaging of the dependencies \n    # Disables packaging of requirements, allowing the 'serverless-python-requirements' plugin to handle them\n  pythonRequirements:\n    dockerizePip: non-linux # docker used if it's non linux enviroment\n    # Specifies that Docker should be used to package dependencies only when not a Linux System\n    # Configures throttling settings for the API Gateway stage\n    slim: true # reduces the size of the deployment package. \n  # They apply to all http endpoints, unless specifically overridden\n  apiGatewayThrottling:\n    maxRequestsPerSecond: 500 \n    maxConcurrentRequests: 250\n#\n# This section specifies the cloud provider details.\nprovider:\n  name: aws\n  # The cloud provider for deployment, which is AWS in this case.\n  runtime: python3.12\n  # The Python runtime version being used.\n  stage: dev\n  # The deployment stage\n  region: us-east-1\n  # The AWS region where is stored the service\n  iamRoleStatements:\n    - Effect: Allow\n      Action:\n        - dynamodb:Query # Permission to Query\n        - dynamodb:Scan # Permission to Scan\n        - dynamodb:GetItem # Permission to getitem\n        - dynamodb:PutItem # Permission to putitem\n        - dynamodb:UpdateItem # Permission to updateitem\n        - dynamodb:DeleteItem # Permission to deleteitem\n        # Grants the Lambda functions permission to perform these DynamoDB actions\n      Resource:\n        - { \"Fn::GetAtt\": [\"UsersDynamoDBTable\", \"Arn\" ] }\n  environment:\n    USERS_TABLE: ${self:custom.tableName}\n    # Sets an enviroment variable 'USERS_TABLE' to the name of the DynamoDB table\n#\n# Definitions of the Lamda functions that will be deployed, including their handleres and events\n# that trigger them.\nfunctions:\n  app:\n    handler: wsgi.handler\n    # This is the handler for the main Flask app.\n    events:\n      - http: ANY /\n      # This function will respond to any HTTP method at the root path\n      - http: 'ANY {proxy+}'\n      # This function will respond to any HTTP method at any path\n  getUser:\n    handler: wsgi.handler\n    # The handler to get the user\n    events:\n      - http: 'GET /users/{proxy+}'\n      # This function will respond to a GET request to get a user\n  createUser:\n    handler: wsgi.handler\n    # The handler to create the user\n    events:\n      - http: 'POST /users/'\n      # This function will respond to POST to create a user\n  deleteUser:\n    handler: wsgi.handler\n    # The handler to delete the user\n    events:\n      - http: 'POST /users/delete'\n      # This function will respond to POST to delete a user\n  updateUser:\n    handler: wsgi.handler\n    # The handler to update the user\n    events:\n      - http: 'POST /users/update'\n      # This function will respond to POST to update a user\n#\n#    \n# Definition of additional AWS resources managed by the Serverless Framework\nresources:\n  Resources:\n    UsersDynamoDBTable:\n      Type: 'AWS::DynamoDB::Table'\n      # Defines a DynamoDB table as an AWS resource\n      Properties:\n        AttributeDefinitions:\n          -\n            AttributeName: userId # Definition of the prumary key attribute as a String\n            AttributeType: S \n        KeySchema:\n          -\n            AttributeName: userId\n            KeyType: HASH\n            # Specifies the userid as the hash key (primary key)\n        # Controls the read and write capacity of the DynamoDB table\n        ProvisionedThroughput:\n          ReadCapacityUnits: 1\n          WriteCapacityUnits: 1\n          # Sets the read and write capacity for the DynamoDB table\n        TableName: ${self:custom.tableName}\n        # Sets the table name using the custom variable defined earlier",
+    "command": [
+      "deploy"
+    ],
+    "options": {},
+    "error": null,
+    "params": {},
+    "machineId": "4f39a41a150ef7359c2579cc4f07f4cf",
+    "accessKeyV2": "<REDACTED>",
+    "accessKeyV1": "<REDACTED>",
+    "orgId": "9e417178-29b7-4019-a557-515256c5f4bc",
+    "orgName": "giovsuper",
+    "userId": "PD8w53J6MqJS2wysyp",
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "userName": "giovsuper",
+    "subscription": null,
+    "userEmail": "g.magrone7@studenti.uniba.it",
+    "serviceProviderAwsCredentials": "<REDACTED>",
+    "serviceProviderAwsAccountId": "026090545935",
+    "versionSf": "4.1.21",
+    "serviceProviderAwsCfStackName": "serverless-flask-dev",
+    "integrations": {},
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:026090545935:stack/serverless-flask-dev/fc2fb660-565c-11ef-b617-128e8fed485f",
+    "serviceProviderAwsCfStackCreated": "2024-08-09T14:38:04.063Z",
+    "serviceProviderAwsCfStackUpdated": "2024-08-13T10:37:31.319Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "RestApiIdForApigThrottling",
+        "OutputValue": "bxhgi6dn1d",
+        "Description": "REST API ID",
+        "ExportName": "sls-serverless-flask-dev-RestApiIdForApigThrottling"
+      },
+      {
+        "OutputKey": "DeleteUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:026090545935:function:serverless-flask-dev-deleteUser:22",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-flask-dev-DeleteUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "UpdateUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:026090545935:function:serverless-flask-dev-updateUser:16",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-flask-dev-UpdateUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "AppLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:026090545935:function:serverless-flask-dev-app:29",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-flask-dev-AppLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "GetUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:026090545935:function:serverless-flask-dev-getUser:27",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-flask-dev-GetUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "CreateUserLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:026090545935:function:serverless-flask-dev-createUser:27",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-flask-dev-CreateUserLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ServiceEndpoint",
+        "OutputValue": "https://bxhgi6dn1d.execute-api.us-east-1.amazonaws.com/dev",
+        "Description": "URL of the service endpoint",
+        "ExportName": "sls-serverless-flask-dev-ServiceEndpoint"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-flask-dev-serverlessdeploymentbucket-ieyxbviehean",
+        "ExportName": "sls-serverless-flask-dev-ServerlessDeploymentBucketName"
+      }
+    ]
+  }
+}

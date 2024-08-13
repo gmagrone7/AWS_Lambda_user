@@ -1,0 +1,121 @@
+# serverless.yml
+#
+# Defininig the name of the Serverless service
+service: serverless-flask
+# The name of the service. This is what the service will be called in AWS
+#
+# Specification of the plugins that the Serverless framework will use 
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+  - serverless-api-gateway-throttling
+
+# These are the plugins that are being used:
+# 1) Serverless python requirements, manage python dependencies
+# 2) Serverless wsgi, allows integration of apps like Flask with Serverless 
+# 
+# Definition of the custom variables that  can be reused with the
+# configuration file.
+custom:
+  tableName: 'users-table-${self:provider.stage}' # Custom variable for the DynamoDB table name, which is dynamically set based on the stage.
+  wsgi:
+    app: app.app
+    # Specifies the WSGI application. 'app' is the module and 'app' is the Flask app object
+    packRequirements: false # to use the serverless-python requirements to handle the packaging of the dependencies 
+    # Disables packaging of requirements, allowing the 'serverless-python-requirements' plugin to handle them
+  pythonRequirements:
+    dockerizePip: non-linux # docker used if it's non linux enviroment
+    # Specifies that Docker should be used to package dependencies only when not a Linux System
+    # Configures throttling settings for the API Gateway stage
+    slim: true # reduces the size of the deployment package. 
+  # They apply to all http endpoints, unless specifically overridden
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 500 
+    maxConcurrentRequests: 250
+#
+# This section specifies the cloud provider details.
+provider:
+  name: aws
+  # The cloud provider for deployment, which is AWS in this case.
+  runtime: python3.12
+  # The Python runtime version being used.
+  stage: dev
+  # The deployment stage
+  region: us-east-1
+  # The AWS region where is stored the service
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query # Permission to Query
+        - dynamodb:Scan # Permission to Scan
+        - dynamodb:GetItem # Permission to getitem
+        - dynamodb:PutItem # Permission to putitem
+        - dynamodb:UpdateItem # Permission to updateitem
+        - dynamodb:DeleteItem # Permission to deleteitem
+        # Grants the Lambda functions permission to perform these DynamoDB actions
+      Resource:
+        - { "Fn::GetAtt": ["UsersDynamoDBTable", "Arn" ] }
+  environment:
+    USERS_TABLE: ${self:custom.tableName}
+    # Sets an enviroment variable 'USERS_TABLE' to the name of the DynamoDB table
+#
+# Definitions of the Lamda functions that will be deployed, including their handleres and events
+# that trigger them.
+functions:
+  app:
+    handler: wsgi.handler
+    # This is the handler for the main Flask app.
+    events:
+      - http: ANY /
+      # This function will respond to any HTTP method at the root path
+      - http: 'ANY {proxy+}'
+      # This function will respond to any HTTP method at any path
+  getUser:
+    handler: wsgi.handler
+    # The handler to get the user
+    events:
+      - http: 'GET /users/{proxy+}'
+      # This function will respond to a GET request to get a user
+  createUser:
+    handler: wsgi.handler
+    # The handler to create the user
+    events:
+      - http: 'POST /users/'
+      # This function will respond to POST to create a user
+  deleteUser:
+    handler: wsgi.handler
+    # The handler to delete the user
+    events:
+      - http: 'POST /users/delete'
+      # This function will respond to POST to delete a user
+  updateUser:
+    handler: wsgi.handler
+    # The handler to update the user
+    events:
+      - http: 'POST /users/update'
+      # This function will respond to POST to update a user
+#
+#    
+# Definition of additional AWS resources managed by the Serverless Framework
+resources:
+  Resources:
+    UsersDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      # Defines a DynamoDB table as an AWS resource
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: userId # Definition of the prumary key attribute as a String
+            AttributeType: S 
+        KeySchema:
+          -
+            AttributeName: userId
+            KeyType: HASH
+            # Specifies the userid as the hash key (primary key)
+        # Controls the read and write capacity of the DynamoDB table
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+          # Sets the read and write capacity for the DynamoDB table
+        TableName: ${self:custom.tableName}
+        # Sets the table name using the custom variable defined earlier

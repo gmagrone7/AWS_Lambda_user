@@ -1,0 +1,10 @@
+awscli
+blinker
+boto3
+botocore
+Flask
+itsdangerous
+Jinja2
+python-dateutil
+PyYAML
+Werkzeug
