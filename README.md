@@ -1,6 +1,6 @@
-<!--
-title: 'Serverless Framework Python Flask API backed by DynamoDB on AWS'
-description: 'This template demonstrates how to develop and deploy a simple Python Flask API service backed by DynamoDB running on AWS Lambda using the Serverless Framework.'
+﻿<!--
+title: 'Users management by using Serverless Framework Python Flask API service backed by DynamoDB on AWS using AWS Lambdas'
+description: 'This template demonstrates how to develop and deploy a simple user management Python Flask API service backed by DynamoDB running on AWS Lambda using the Serverless Framework.'
 layout: Doc
 framework: v4
 platform: AWS
@@ -11,48 +11,79 @@ authorName: 'Serverless, Inc.'
 authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 -->
 
-# Serverless Framework Python Flask API service backed by DynamoDB on AWS
+# Users CRUD management by using Serverless Framework Python Flask API service backed by DynamoDB on AWS using AWS Lambdas.
 
-This template demonstrates how to develop and deploy a simple Python Flask API service, backed by DynamoDB, running on AWS Lambda using the Serverless Framework.
+## **Index**
+-   [Introduction](#introduction)
+-   [Prerequisites](#prerequisites)
+-   [Installation](#installation)
+-   [Configuration](#configuration)
+-   [Deployment](#deployment)
+-   [API Endpoints](#api-endpoints)
+    -   [Root Endpoint](#root-endpoint)
+    -   [Get User by ID](#get-user-by-id)
+    -   [Create User](#create-user)
+    -   [Delete User](#delete-user)
+    -   [Update User](#update-user)
+-   [Error Handling](#error-handling)
+-   [Testing](#testing)
+-   [Contributing](#contributing)
+-   [License](#license)
 
-This template configures a single function, `api`, which is responsible for handling all incoming requests thanks to configured `http` events. To learn more about `http` event configuration options, please refer to [http event docs](https://www.serverless.com/framework/docs/providers/aws/events/apigateway/). As the events are configured in a way to accept all incoming requests, `Flask` framework is responsible for routing and handling requests internally. The implementation takes advantage of `serverless-wsgi`, which allows you to wrap WSGI applications such as Flask apps. To learn more about `serverless-wsgi`, please refer to corresponding [GitHub repository](https://github.com/logandk/serverless-wsgi). The template also relies on `serverless-python-requirements` plugin for packaging dependencies from `requirements.txt` file. For more details about `serverless-python-requirements` configuration, please refer to corresponding [GitHub repository](https://github.com/UnitedIncome/serverless-python-requirements).
+## **1. Introduction**
 
-Additionally, the template also handles provisioning of a DynamoDB database that is used for storing data about users. The Flask application exposes two endpoints, `POST /users` and `GET /user/{userId}`, which allow to create and retrieve users.
+This project is a serverless Flask application designed for managing user data using AWS DynamoDB. 
+The application provides a RESTful API for creating, retrieving, updating, and deleting users. It's deployed on AWS using the Serverless Framework and the AWS lambdas.
 
-## Usage
+## **2. Prerequisites**
 
-### Prerequisites
+Before to start, is important to check if these prerequisities are installed :
 
-In order to package your dependencies locally with `serverless-python-requirements`, you need to have `Python3.8` installed locally. You can create and activate a dedicated virtual environment with the following command:
+-   Python 3.12+
+-   AWS CLI configured with appropriate access(if you don't have an account you should create one)
+-   Node.js and npm (for Serverless Framework)
+-   Serverless Framework installed globally (`npm install -g serverless`)
+-  Install also serverless-wsgi and serverless-api-gateway-throttling
+(`npm install serverless-wsgi`)
+(`npm install serverless-api-gateway-throttling`)
+- Also install this
+(`serverless dynamodb install`)
 
-```
-python3.8 -m venv ./venv
-source ./venv/bin/activate
-```
+## **3. Installation**
 
-Alternatively, you can also use `dockerizePip` configuration from `serverless-python-requirements`. For details on that, please refer to corresponding [GitHub repository](https://github.com/UnitedIncome/serverless-python-requirements).
+To install and set up the project locally:
 
-### Deployment
+1.  Clone the repository:  
+    `git clone <https://github.com/gmagrone7/AWS_Lambda_user>
+    cd <YOUR REPOSITORY>` 
+    It's suggested to use git to do this.
+    
+2.  Install Python dependencies:
+    `pip install -r requirements.txt` 
+    
+3.  Install Serverless plugins and dependencies:
+    `npm install` 
+    
 
-install dependencies with:
+## **4. Configuration**
 
-```
-npm install
-```
+We install the serverless framework and from it we initialized a flask application, starting from that point we just used this two file that we used to create and develop the application.
 
-and then perform deployment with:
+-   **serverless.yml**: This file contains the configuration for deploying the application, including the provided details, the plugins, environment variables, and resource definitions, used for the table.
+-  **app.py**:  This is the main application file, this contains the Flask routes and the logic for interacting with the DynamoDB moreover here it's stored the code related to the CRUD function for the user.
 
-```
-serverless deploy
-```
 
-After running deploy, you should see output similar to:
+## **5. Deployment**
 
-```
-Deploying "aws-python-flask-dynamodb-api" to stage "dev" (us-east-1)
+To deploy the application to AWS:
 
-Using Python specified in "runtime": python3.12
+1.  Ensure your AWS credentials are configured correctly, if they are not you need to generate a key from your AWS dashboard and you need to change the settings to make it works with your AWS console
+2.  Deploy the application using Serverless Framework:
+    `serverless deploy` 
+    
+3.  After deployment, note the API Gateway URL provided in the output, those are the one that now you can use to work with the server function.
 
+**After the execution you will see something like this:**
 Packaging Python WSGI handler...
 
 ✔ Service deployed to stack aws-python-flask-dynamodb-api-dev (123s)
@@ -62,94 +93,112 @@ endpoints:
   ANY - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/dev/{proxy+}
 functions:
   api: aws-python-flask-dynamodb-api-dev-api (41 MB)
-```
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [http event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api).
+-   `USERS_TABLE`: The name of the DynamoDB table used for storing user data. This is dynamically set in `serverless.yml` .
 
-### Invocation
+## **6. API Endpoints**
 
-After successful deployment, you can create a new user by calling the corresponding endpoint:
+### **Root Endpoint**
+This is used to access to the mainpage, it's just the root and it's a good practice because it allow to redirect to the other function
+-   **URL**: `/`
+-   **Method**: `GET`
+-   **Description**: Returns a welcome message to state that you enter into  the page.
+-   **Response**:
+    -   `200 OK`: "Hello, welcome to my small project for the hire."
 
-```
-curl --request POST 'https://xxxxxx.execute-api.us-east-1.amazonaws.com/dev/users' --header 'Content-Type: application/json' --data-raw '{"name": "John", "userId": "someUserId"}'
-```
+### **Get User by ID**
+The function used to retrieve the user given the id 
+-   **URL**: `/users/<string:user_id>`
+-   **Method**: `GET`
+-   **Description**: Retrieves a user by `user_id`.
+-   **Response**:
+    -   `200 OK`: JSON object with user details.
+    -   `404 Not Found`: User does not exist.
 
-Which should result in the following response:
+### **Create User**
+The function used to create a new user 
+-   **URL**: `/users`
+-   **Method**: `POST`
+-   **Description**: Creates a new user.
+-   **Request Body**:
+    -   `name`: String, required.
+    -   `email`: String, required (must contain `@`).
+    -   `password`: String, required (must contain at least one uppercase letter).
+-   **Response**:
+    -   `201 Created`: JSON object with created user details.
+    -   `400 Bad Request`: Validation errors.
 
-```json
-{ "userId": "someUserId", "name": "John" }
-```
+### **Delete User**
+The function used to delete a user
+-   **URL**: `/users/delete`
+-   **Method**: `POST`
+-   **Description**: Deletes a user.
+-   **Request Body**:
+    -   `userId`: String, required.
+-   **Response**:
+    -   `200 OK`: Confirmation message.
+    -   `404 Not Found`: User does not exist.
 
-You can later retrieve the user by `userId` by calling the following endpoint:
+### **Update User**
+The function used to update a user
+-   **URL**: `/users/update`
+-   **Method**: `POST`
+-   **Description**: Updates user information.
+-   **Request Body** (all fields optional except `userId`):
+    -   `userId`: String, required.
+    -   `name`: String, optional.
+    -   `email`: String, optional.
+    -   `password`: String, optional.
+-   **Response**:
+    -   `200 OK`: Confirmation message with updated attributes.
+    -   `400 Bad Request`: errors.
 
-```
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/dev/users/someUserId
-```
+## **7. Error Handling**
 
-Which should result in the following response:
+The Handling of the errors its crucial due to the fact that it can interrupt or block the services due this we implement two methods:
 
-```json
-{ "userId": "someUserId", "name": "John" }
-```
+-   The API returns appropriate HTTP status codes and error messages in JSON format for different scenarios such as validation errors, missing data, and server issues.
+-  Throttling to avoid a too big number of access to the resouces.
 
-### Local development
+## **8. Testing**
 
-Thanks to capabilities of `serverless-wsgi`, it is also possible to run your application locally, however, in order to do that, you will need to first install `werkzeug`, `boto3` dependencies, as well as all other dependencies listed in `requirements.txt`. It is recommended to use a dedicated virtual environment for that purpose. You can install all needed dependencies with the following commands:
+-   To test the application locally:
+    1.  Run the Flask app:
+        `flask run` 
+    2.  Use tools like Postman or `curl` to test the endpoints.
+ - To test the application remote:
+    1.  Run the deployment:
+        `serverless deploy` 
+    2.  Use tools like Postman or `curl` to test the endpoints, in our case we used Postman to test the application and to see how the endpoints were working.
+ 
 
-```
-pip install werkzeug boto3
-pip install -r requirements.txt
-```
 
-Additionally, you will need to emulate DynamoDB locally, which can be done by using `serverless-dynamodb-local` plugin. In order to do that, execute the following commands:
+## **9. Contributing**
+The following link has been used to study and to develop the application
+-   [AWS Free Plan](https://aws.amazon.com/it/free/?trk=ps_a134p000003yhgtAAA&trkCampaign=acq_paid_search_brand&sc_channel=ps&sc_campaign=acquisition_IT&sc_publisher=google&sc_category=core-main&sc_country=IT&sc_geo=EMEA&sc_outcome=Acquisition&sc_detail=amazon%20web%20services&sc_content=Brand_amazon_web_services_e&sc_matchtype=e&sc_segment=455721528617&sc_medium=ACQ-P%7CPS-GO%7CBrand%7CDesktop%7CSU%7CCore-Main%7CCore%7CIT%7CEN%7CText&s_kwcid=AL!4422!3!455721528617!e!!g!!amazon%20web%20services&ef_id=EAIaIQobChMI_NPSh_vo7QIVEL_tCh18rQGNEAAYASAAEgJnl_D_BwE:G:s&s_kwcid=AL!4422!3!455721528617!e!!g!!amazon%20web%20services&all-free-tier.sort-by=item.additionalFields.SortRank&all-free-tier.sort-order=asc)
+    
+-   [AWS lambda](https://aws.amazon.com/it/lambda/)
+    
+-   [AWS DynamoDB](https://aws.amazon.com/it/dynamodb/)
+    
+-   [AWS API Gateway](https://aws.amazon.com/it/api-gateway/)
+    
+-   [Serverless Framework Quick Start](https://www.serverless.com/framework/docs/providers/aws/guide/quick-start/)
 
-```
-serverless plugin install -n serverless-dynamodb-local
-serverless dynamodb install
-```
+## **10. License**
 
-It will add the plugin to `devDependencies` in `package.json` file as well as to `plugins` section in `serverless.yml`. Additionally, it will also install DynamoDB locally.
+This template demonstrates how to develop and deploy a simple Python Flask API service, backed by DynamoDB, running on AWS Lambda using the Serverless Framework.
 
-You should also add the following config to `custom` section in `serverless.yml`:
+This template configures a single function, `api`, which is responsible for handling all incoming requests thanks to configured `http` events. To learn more about `http` event configuration options, please refer to [http event docs](https://www.serverless.com/framework/docs/providers/aws/events/apigateway/). 
 
-```yml
-custom:
-  (...)
-  dynamodb:
-    start:
-      migrate: true
-    stages:
-      - dev
-```
+As the events are configured in a way to accept all incoming requests, `Flask` framework is responsible for routing and handling requests internally. 
 
-Additionally, we need to reconfigure DynamoDB Client to connect to our local instance of DynamoDB. We can take advantage of `IS_OFFLINE` environment variable set by `serverless-wsgi` plugin and replace:
+The implementation takes advantage of `serverless-wsgi`, which allows you to wrap WSGI applications such as Flask apps. 
 
-```python
-dynamodb_client = boto3.client('dynamodb')
-```
+Additionally, the template also handles provisioning of a DynamoDB database that is used for storing data about users.
 
-with
 
-```python
-dynamodb_client = boto3.client('dynamodb')
 
-if os.environ.get('IS_OFFLINE'):
-    dynamodb_client = boto3.client('dynamodb', region_name='localhost', endpoint_url='http://localhost:8000')
-```
 
-Now you can start DynamoDB local with the following command:
 
-```
-serverless dynamodb start
-```
 
-At this point, you can run your application locally with the following command:
-
-```
-serverless wsgi serve
-```
-
-For additional local development capabilities of `serverless-wsgi` and `serverless-dynamodb-local` plugins, please refer to corresponding GitHub repositories:
-
-- https://github.com/logandk/serverless-wsgi
-- https://github.com/99x/serverless-dynamodb-local
